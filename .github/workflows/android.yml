@@ -12,7 +12,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     env:
-      HAS_KEY: ${{ secrets.KEYSTORE_BASE64 != '' }}
+      HAS_KEY: ${{ secrets.KEYSTORE_PASSWORD != '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -55,16 +55,14 @@ jobs:
       - name: Signierte APK und AAB bauen
         if: env.HAS_KEY == 'true'
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          # keystore.enc ist der mit AES-256 verschlüsselte Signaturschlüssel; nur mit dem Secret entschlüsselbar
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in keystore.enc -out "$RUNNER_TEMP/release.jks" -pass env:KEYSTORE_PASSWORD
           mkdir -p out
-          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias "$KEY_ALIAS" --keystorealiaspass "$KEY_PASSWORD" --androidreleasetype APK
+          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype APK
           cp android/app/build/outputs/apk/release/*.apk out/DieBox.apk
-          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias "$KEY_ALIAS" --keystorealiaspass "$KEY_PASSWORD" --androidreleasetype AAB
+          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype AAB
           cp android/app/build/outputs/bundle/release/*.aab out/DieBox-PlayStore.aab
           rm -f "$RUNNER_TEMP/release.jks"
 

@@ -36,9 +36,8 @@ Ohne Firebase läuft die App trotzdem – dann gibt es nur die eigene Statistik 
    > als Namen `.github/workflows/android.yml` eintippen und den Inhalt der Datei hineinkopieren (dasselbe für `pages.yml`).
 
 ### Web-App online stellen
-4. Im Repository: **Settings → Pages → Source: GitHub Actions**.
-5. Unter **Actions** läuft „Web-App veröffentlichen“. Nach ~1 Minute ist das Spiel erreichbar unter
-   `https://mirkopavelec.github.io/die-box/`
+4. Bei jeder Änderung in `www/` kopiert die Action „Web-App veröffentlichen“ die App auf den Branch `gh-pages`.
+5. Das Spiel ist erreichbar unter `https://mirkopavelec.github.io/Die-box/`
 6. Auf dem Handy öffnen → Browser-Menü → **„Zum Startbildschirm hinzufügen“**. Fertig – sieht aus wie eine App und läuft auch offline.
 
 ### Android-App (APK) bekommen
@@ -90,40 +89,27 @@ Gespeichert pro Runde: zufällige Geräte-ID, Zeitpunkt, Gegner, ob verdeckt, Ru
 
 ---
 
-## Schritt 4 – Eigener Signaturschlüssel (für Weitergabe und Updates)
+## Schritt 4 – Signaturschlüssel (bereits erledigt)
 
-Damit Updates sich über die alte Version installieren lassen, braucht die App einen festen Schlüssel.
-Dafür brauchst du einmalig Java (kostenlos: <https://adoptium.net>, „Temurin 17“).
+Der feste Signaturschlüssel liegt **verschlüsselt** (AES-256) als `keystore.enc` im Repository.
+GitHub braucht nur noch **ein** Secret:
 
-```powershell
-keytool -genkeypair -v -keystore die-box.jks -alias diebox -keyalg RSA -keysize 2048 -validity 10000
-```
-Passwort merken. Dann den Schlüssel als Text kopieren (Windows PowerShell):
-```powershell
-[Convert]::ToBase64String([IO.File]::ReadAllBytes("die-box.jks")) | Set-Clipboard
-```
-Im Repository: **Settings → Secrets and variables → Actions → New repository secret**, vier Stück:
+**Settings → Secrets and variables → Actions → New repository secret**
+- Name: `KEYSTORE_PASSWORD`
+- Wert: das Passwort, das du von Claude bekommen hast
 
-| Name | Wert |
-|---|---|
-| `KEYSTORE_BASE64` | der kopierte Text |
-| `KEYSTORE_PASSWORD` | dein Keystore-Passwort |
-| `KEY_ALIAS` | `diebox` |
-| `KEY_PASSWORD` | dein Schlüssel-Passwort (meist dasselbe) |
+Ab dann baut GitHub **`DieBox.apk`** (signiert, Updates ohne Neuinstallation) und **`DieBox-PlayStore.aab`**.
+Ohne das Secret entsteht weiter nur `DieBox-test.apk`.
 
-Ab jetzt baut GitHub **`DieBox.apk`** (signiert) und **`DieBox-PlayStore.aab`** (für einen späteren Play-Store-Upload).
+> ⚠️ Passwort und die Sicherungskopie `die-box.jks` gut aufbewahren (Passwortmanager + USB-Stick).
+> Ohne sie kann die App nie wieder aktualisiert werden. Alias: `diebox`.
 
-> ⚠️ `die-box.jks` und das Passwort sicher aufbewahren (z. B. USB-Stick + Passwortmanager) und **nie** ins Repository hochladen.
-> Geht der Schlüssel verloren, kann die App nie wieder aktualisiert werden.
-
-**Vor dem ersten echten Release:** In `capacitor.config.json` ist die `appId` bereits auf `io.github.mirkopavelec.diebox` gesetzt. Nicht mehr ändern, sonst gilt die App als neue App.
-
----
+Die `appId` ist `io.github.mirkopavelec.diebox` – nicht mehr ändern, sonst gilt die App als neue App.
 
 ## Schritt 5 – Verteilen
 
 - **Download-Link:** Jeder Bau auf `main` aktualisiert automatisch die Release zur Version aus `package.json`. Für eine neue Version dort `"version"` erhöhen.
-  Den Link `github.com/MirkoPavelec/die-box/releases/latest` kannst du überall teilen (oder als QR-Code).
+  Den Link `github.com/MirkoPavelec/Die-box/releases/latest` kannst du überall teilen (oder als QR-Code).
 - **Web-Version:** einfach den GitHub-Pages-Link teilen.
 - **Play Store (später, falls gewünscht):** einmalig 25 $, dazu ein geschlossener Test mit mindestens 12 Testern über 14 Tage für neue Privatkonten. Die `.aab`-Datei dafür baut der Workflow schon mit.
 - **F-Droid:** Wegen der Firebase-Bibliothek von Google würde F-Droid die App nicht aufnehmen. Ohne Firebase (nur lokale Statistik) wäre es möglich.
