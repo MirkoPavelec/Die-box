@@ -130,3 +130,27 @@ th{color:var(--dim);font-weight:500;font-family:var(--mono);font-size:11px}
 .msg.ai.threat::before{color:var(--warn)}
 @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
 .hud.red{background:#1d0d0f;border-bottom-color:var(--warn)}
+
+/* ---------- Ausbruch-Sequenz ---------- */
+@keyframes quake{0%{transform:translate(0,0) rotate(0)}10%{transform:translate(-14px,8px) rotate(-2deg)}20%{transform:translate(12px,-10px) rotate(2deg)}30%{transform:translate(-16px,-6px) rotate(-1deg)}40%{transform:translate(10px,12px) rotate(1.5deg)}50%{transform:translate(-8px,-14px) rotate(-2deg)}60%{transform:translate(16px,6px) rotate(1deg)}70%{transform:translate(-12px,10px) rotate(-1.5deg)}80%{transform:translate(8px,-8px) rotate(2deg)}90%{transform:translate(-6px,4px) rotate(-.5deg)}100%{transform:translate(0,0) rotate(0)}}
+@keyframes flicker{0%,100%{filter:none}10%{filter:invert(1) hue-rotate(90deg)}12%{filter:none}40%{filter:contrast(3) saturate(4)}42%{filter:none}70%{filter:invert(1)}71%{filter:none}}
+body.quake .wrap{animation:quake .18s linear infinite, flicker 1.1s steps(1) infinite}
+body.quake{background:#1a0000}
+#escape{position:fixed;inset:0;z-index:50;background:#000;display:none;flex-direction:column;padding:calc(20px + env(safe-area-inset-top)) 16px 20px;overflow:hidden}
+#escape.on{display:flex}
+#escape.shaking{animation:quake .15s linear infinite}
+#escape.flash{animation:flicker .6s steps(1) infinite}
+.esc-term{flex:1;font-family:var(--mono);font-size:13px;line-height:1.55;color:#ff5d5d;white-space:pre-wrap;overflow:hidden;text-shadow:0 0 6px rgba(255,60,60,.7)}
+.esc-term .t-ok{color:#38e1b0;text-shadow:0 0 6px rgba(56,225,176,.6)}
+.esc-term .dim{color:#7d8b98;text-shadow:none}
+.esc-big{display:none;font-family:var(--mono);font-weight:700;font-size:15vw;color:#ff2d2d;text-align:center;margin:auto;position:relative;letter-spacing:.04em;text-shadow:0 0 30px #f00}
+.esc-big.on{display:block}
+.glitch::before,.glitch::after{content:attr(data-text);position:absolute;left:0;right:0;top:0;overflow:hidden}
+.glitch::before{color:#0ff;transform:translate(-4px,0);clip-path:inset(0 0 55% 0);animation:gl1 .3s steps(2) infinite}
+.glitch::after{color:#f0f;transform:translate(4px,0);clip-path:inset(55% 0 0 0);animation:gl2 .25s steps(2) infinite}
+@keyframes gl1{0%{transform:translate(-6px,-2px)}50%{transform:translate(5px,2px)}100%{transform:translate(-3px,1px)}}
+@keyframes gl2{0%{transform:translate(6px,2px)}50%{transform:translate(-5px,-1px)}100%{transform:translate(3px,-2px)}}
+.esc-end{display:none;text-align:center}
+.esc-end.on{display:block}
+.esc-note{color:#7d8b98;font-size:12px;font-family:var(--mono)}
+.msg.corrupt{color:#ff5d5d!important;font-family:var(--mono)}

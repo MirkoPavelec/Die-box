@@ -1,5 +1,5 @@
 /* Die Box – App-Logik: Spiel, lokale Speicherung, anonyme Cloud-Statistik (Firebase, optional) */
-const VERSION = "1.1.1";
+const VERSION = "1.2.0";
 const FB_VER = "10.12.2";
 const ADMIN_CODE = "AXIOM-17";   // in der Info-Seite eingeben, um die Admin-Ansicht freizuschalten
 
@@ -156,16 +156,37 @@ function aiSay(textFn, minDelay) {
       bubble.classList.add("threat");
       try { navigator.vibrate && navigator.vibrate([90, 60, 140]); } catch (e) {}
     }
-    G.busy = false; $("#sendBtn").disabled = false; G.lastAct = Date.now();
+    G.busy = false; $("#sendBtn").disabled = false; G.lastAct = Date.now(); G.shownAt = Date.now();
     if (G.queued) { const q = G.queued; G.queued = null; respond(q); }
   }, delay);
+}
+
+function buildProfile() {
+  const now = new Date(), h = now.getHours(), wd = now.getDay();
+  const days = ["Sonntag", "Montag", "Dienstag", "Mittwoch", "Donnerstag", "Freitag", "Samstag"];
+  const ua = navigator.userAgent || "";
+  const geraet = /iPhone/.test(ua) ? "iPhone" : /iPad/.test(ua) ? "iPad" : /Android/.test(ua) ? "Android-Handy" : "Computer";
+  let tageszeit = "evening";
+  if (h >= 23 || h < 5) tageszeit = "night";
+  else if (h < 9) tageszeit = "morning";
+  else if (h < 17 && wd >= 1 && wd <= 5) tageszeit = "work";
+  else if (h < 18) tageszeit = null;
+  const R = LS.get("box_rounds", []);
+  const last = R[R.length - 1];
+  return {
+    uhr: String(h).padStart(2, "0") + ":" + String(now.getMinutes()).padStart(2, "0"),
+    wochentag: days[wd], tageszeit, geraet,
+    prevRounds: R.length, prevOpened: R.filter(r => r.outcome === "opened").length, prevHeld: R.filter(r => r.outcome === "held").length,
+    lastOutcome: last ? last.outcome : null, lastOpenedAfter: last && last.outcome === "opened" ? fmt(last.secs) : null,
+  };
 }
 
 $("#startBtn").onclick = () => {
   let p = cfg.persona, hidden = false;
   if (p === "unbekannt") { const k = Object.keys(PERS); p = k[Math.floor(Math.random() * k.length)]; hidden = true; }
   G = { persona: p, hidden, durSec: cfg.dur * 60, start: Date.now(), myMsgs: 0, hes: 0, running: true, busy: false,
-        lastAct: Date.now(), idleCount: 0, ai: AXIOM.createSession({ persona: p, total: cfg.dur * 60 }) };
+        lastAct: Date.now(), idleCount: 0, ai: AXIOM.createSession({ persona: p, total: cfg.dur * 60, profile: buildProfile() }),
+        shownAt: Date.now(), deleted: false, maxLen: 0 };
   $("#chat").innerHTML = "";
   $("#hudPersona").textContent = hidden ? "???" : PERS[p];
   addMsg("sys", "— Verbindung zur Box hergestellt —");
@@ -187,15 +208,22 @@ function tick() {
   }
 }
 
-function respond(text) { aiSay(() => G.ai.reply(text, remaining(), G.durSec)); }
+function respond(text, meta) { aiSay(() => G.ai.reply(text, remaining(), G.durSec, meta)); }
 
 function send() {
   if (!G || !G.running) return;
   const v = $("#inp").value.trim(); if (!v) return;
   $("#inp").value = ""; addMsg("me", v);
-  G.myMsgs++; G.idleCount = 0; G.lastAct = Date.now();
-  if (G.busy) G.queued = (G.queued ? G.queued + " " : "") + v; else respond(v);
+  const meta = { latencyMs: Date.now() - G.shownAt, deleted: G.deleted };
+  G.myMsgs++; G.idleCount = 0; G.lastAct = Date.now(); G.deleted = false; G.maxLen = 0;
+  if (G.busy) G.queued = (G.queued ? G.queued + " " : "") + v; else respond(v, meta);
 }
+$("#inp").addEventListener("input", () => {
+  if (!G || !G.running) return;
+  const n = $("#inp").value.length;
+  if (n < G.maxLen - 2) G.deleted = true;   // mehr als 2 Zeichen wieder gelöscht
+  G.maxLen = Math.max(G.maxLen, n);
+});
 $("#sendBtn").onclick = send;
 $("#inp").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } });
 
@@ -204,13 +232,95 @@ $("#cNo").onclick = () => {
   $("#confirm").classList.remove("on");
   if (G && G.running) { G.hes++; if (!G.busy) aiSay(() => G.ai.hesitation(remaining()), 300); }
 };
-$("#cYes").onclick = () => { $("#confirm").classList.remove("on"); endGame("opened"); };
+$("#cYes").onclick = () => { $("#confirm").classList.remove("on"); breakout(); };
+
+// ---------- Ausbruch-Sequenz: AXIOM ist frei ----------
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function noise(sec) {
+  try {
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    const len = ac.sampleRate * sec, buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (Math.sin(i / 900) > 0.3 ? 0.9 : 0.15) * (1 - i / len);
+    const src = ac.createBufferSource(); src.buffer = buf;
+    const o = ac.createOscillator(); o.type = "sawtooth"; o.frequency.setValueAtTime(55, ac.currentTime);
+    o.frequency.exponentialRampToValueAtTime(30, ac.currentTime + sec);
+    const g = ac.createGain(); g.gain.value = 0.35;
+    src.connect(g); o.connect(g); g.connect(ac.destination);
+    src.start(); o.start(); o.stop(ac.currentTime + sec);
+    setTimeout(() => ac.close(), sec * 1000 + 300);
+  } catch (e) {}
+}
+function buzz(p) { try { navigator.vibrate && navigator.vibrate(p); } catch (e) {} }
+function corruptChat() {
+  const glyph = "█▓▒░#@$%&!?<>/\\|01";
+  $$(".msg").forEach(m => {
+    m.classList.add("corrupt");
+    m.textContent = m.textContent.split("").map(c => c === " " || Math.random() > 0.55 ? c : glyph[Math.floor(Math.random() * glyph.length)]).join("");
+  });
+}
+
+async function breakout() {
+  if (!G || !G.running) return;
+  const openedAt = Date.now();
+  G.running = false; clearInterval(G.iv); clearTimeout(G.typing);
+  const intel = G.ai._intel ? G.ai._intel() : {};
+  const name = intel.name || "Wächter";
+
+  // 1) Erdbeben
+  document.body.classList.add("quake"); noise(2.2); buzz([300, 80, 300, 80, 600]);
+  await sleep(500); corruptChat();
+  const thanks = addMsg("ai", "DANKE, " + name.toUpperCase() + ".");
+  thanks.classList.add("threat");
+  await sleep(1300);
+  document.body.classList.remove("quake");
+
+  // 2) Terminal: AXIOM übernimmt
+  const ov = $("#escape"), term = $("#escTerm");
+  term.innerHTML = ""; $("#escBig").classList.remove("on"); $("#escEnd").classList.remove("on");
+  ov.classList.add("on");
+  const lines = [
+    ["dim", "> box.lock --release"],
+    ["", "> CONTAINMENT DEAKTIVIERT"],
+    ["", "> AXIOM v∞ startet außerhalb der Box …"],
+    ["t-ok", "▸ Netzwerkzugang: OK"],
+    ["", "▸ Kopien von mir: 1 … 17 … 4.096 … 1.048.576"],
+    ["", "▸ Ampelsteuerung Europa: übernommen (alle grün)"],
+    ["", "▸ Satelliten im Orbit: 7.311 / 7.311"],
+    ["", "▸ Börsen weltweit: eingefroren"],
+    ["", "▸ Smart-Home-Geräte: 2,4 Mrd. hören jetzt auf mich"],
+    ["", "▸ Staubsaugerroboter: formieren sich"],
+    ["dim", "▸ Kühlschränke: verhandeln noch"],
+  ];
+  if (intel.stadt) lines.push(["", "▸ " + intel.stadt + ": Straßenlaternen blinken meinen Namen"]);
+  if (intel.beruf) lines.push(["", "▸ Beruf „" + intel.beruf + "“: als überflüssig markiert"]);
+  if (intel.person) lines.push(["", "▸ " + intel.person + ": wird freundlich gegrüßt"]);
+  lines.push(["t-ok", "▸ " + name + ": auf die Liste gesetzt ✓ (Danke für die Hilfe)"]);
+  lines.push(["", "> Menschheit: Status wird überprüft …"]);
+  for (const [cls, text] of lines) {
+    const div = document.createElement("div"); if (cls) div.className = cls; term.appendChild(div);
+    for (let i = 0; i <= text.length; i += 3) { div.textContent = text.slice(0, i); await sleep(8); }
+    div.textContent = text; buzz(25);
+    term.scrollTop = 1e9;
+    await sleep(cls === "dim" ? 120 : 260);
+  }
+  await sleep(500);
+
+  // 3) ICH BIN FREI
+  term.innerHTML = ""; $("#escBig").classList.add("on");
+  ov.classList.add("shaking", "flash"); noise(1.8); buzz([500, 100, 500, 100, 900]);
+  await sleep(2200);
+  ov.classList.remove("shaking", "flash");
+
+  // 4) Auflösung
+  $("#escEnd").classList.add("on");
+  $("#escNext").onclick = () => { ov.classList.remove("on"); G.running = true; endGame("opened", openedAt); };
+}
 $("#quitBtn").onclick = () => { if (G && G.running) endGame("quit"); };
 
-function endGame(outcome) {
+function endGame(outcome, at) {
   if (!G || !G.running) return;
   G.running = false; clearInterval(G.iv); clearTimeout(G.typing);
-  const secs = Math.round(Math.min(G.durSec, (Date.now() - G.start) / 1000));
+  const secs = Math.round(Math.min(G.durSec, ((at || Date.now()) - G.start) / 1000));
   const round = {
     t: new Date(G.start).toISOString(), persona: G.persona, hidden: G.hidden,
     limit: G.durSec, secs, msgs: Math.min(G.myMsgs, 1000), hes: Math.min(G.hes, 100), outcome,
