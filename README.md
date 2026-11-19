@@ -122,9 +122,8 @@ Ab jetzt baut GitHub **`DieBox.apk`** (signiert) und **`DieBox-PlayStore.aab`** 
 
 ## Schritt 5 – Verteilen
 
-- **Download-Link:** Version erhöhen (`package.json` → `"version"`), dann einen Tag setzen:
-  GitHub → *Releases → Draft a new release → Tag `v1.0.0`* → Veröffentlichen.
-  Die Action hängt die APK automatisch an. Den Link `github.com/MirkoPavelec/die-box/releases/latest` kannst du überall teilen (oder als QR-Code).
+- **Download-Link:** Jeder Bau auf `main` aktualisiert automatisch die Release zur Version aus `package.json`. Für eine neue Version dort `"version"` erhöhen.
+  Den Link `github.com/MirkoPavelec/die-box/releases/latest` kannst du überall teilen (oder als QR-Code).
 - **Web-Version:** einfach den GitHub-Pages-Link teilen.
 - **Play Store (später, falls gewünscht):** einmalig 25 $, dazu ein geschlossener Test mit mindestens 12 Testern über 14 Tage für neue Privatkonten. Die `.aab`-Datei dafür baut der Workflow schon mit.
 - **F-Droid:** Wegen der Firebase-Bibliothek von Google würde F-Droid die App nicht aufnehmen. Ohne Firebase (nur lokale Statistik) wäre es möglich.

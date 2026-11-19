@@ -3,7 +3,6 @@ name: Android-App bauen
 on:
   push:
     branches: [main]
-    tags: ['v*']
   workflow_dispatch:
 
 permissions:
@@ -75,8 +74,20 @@ jobs:
           name: DieBox-Android
           path: out/*
 
-      - name: Als Release veröffentlichen (nur bei Tag v*)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Version lesen
+        id: ver
+        run: echo "v=$(node -p "require('./package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Veröffentlicht die APK als Download unter github.com/<Nutzer>/die-box/releases/latest
+      - name: Als Release veröffentlichen
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: v${{ steps.ver.outputs.v }}
+          name: Die Box ${{ steps.ver.outputs.v }}
+          target_commitish: ${{ github.sha }}
+          make_latest: true
+          body: |
+            **Installation:** `DieBox*.apk` herunterladen → öffnen → „Installation aus unbekannten Quellen“ erlauben.
+            Build ${{ github.run_number }}
           files: out/*.apk
