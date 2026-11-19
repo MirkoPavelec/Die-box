@@ -1,0 +1,26 @@
+name: Firebase prüfen
+
+on:
+  push:
+    branches: [main]
+    paths: ['www/firebase-config.js', '.github/workflows/firebase-check.yml']
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Anonyme Anmeldung, Datenbank und Regeln prüfen (nur lesend)
+        run: |
+          KEY=$(grep -o 'apiKey: "[^"]*"' www/firebase-config.js | cut -d'"' -f2)
+          PID=$(grep -o 'projectId: "[^"]*"' www/firebase-config.js | cut -d'"' -f2)
+          echo "Projekt: $PID"
+          AUTH=$(curl -s -X POST "https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$KEY" -H "Content-Type: application/json" -H "Referer: https://mirkopavelec.github.io/" -d '{"returnSecureToken":true}')
+          TOKEN=$(echo "$AUTH" | python3 -c "import sys,json;print(json.load(sys.stdin).get('idToken',''))")
+          if [ -z "$TOKEN" ]; then echo "AUTH_FEHLER: $AUTH"; else echo "AUTH_OK"; fi
+          R=$(curl -s -o /tmp/r.json -w "%{http_code}" "https://firestore.googleapis.com/v1/projects/$PID/databases/(default)/documents/rounds?pageSize=1" -H "Authorization: Bearer $TOKEN")
+          echo "FIRESTORE_LESEN_HTTP=$R"; head -c 400 /tmp/r.json; echo
+          # Regeltest: ungültige Runde MUSS abgelehnt werden (es wird nichts gespeichert)
+          W=$(curl -s -o /tmp/w.json -w "%{http_code}" -X POST "https://firestore.googleapis.com/v1/projects/$PID/databases/(default)/documents/rounds" -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" -d '{"fields":{"hack":{"stringValue":"x"}}}')
+          echo "REGELTEST_UNGUELTIG_HTTP=$W (403 = Regeln aktiv)"; head -c 300 /tmp/w.json; echo

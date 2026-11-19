@@ -1,5 +1,5 @@
 /* Die Box – App-Logik: Spiel, lokale Speicherung, anonyme Cloud-Statistik (Firebase, optional) */
-const VERSION = "1.2.1";
+const VERSION = "1.3.0";
 const FB_VER = "10.12.2";
 const ADMIN_CODE = "AXIOM-17";   // in der Info-Seite eingeben, um die Admin-Ansicht freizuschalten
 
