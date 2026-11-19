@@ -60,8 +60,13 @@ jobs:
           # keystore.enc ist der mit AES-256 verschlüsselte Signaturschlüssel; nur mit dem Secret entschlüsselbar
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in keystore.enc -out "$RUNNER_TEMP/release.jks" -pass env:KEYSTORE_PASSWORD
           mkdir -p out
-          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype APK
+          # apksigner (Android build-tools) liefert v2/v3-Signaturen – Pflicht ab Android 11
+          BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
+          export PATH="$BT:$PATH"
+          which apksigner
+          npx cap build android --signing-type apksigner --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype APK
           cp android/app/build/outputs/apk/release/*-signed.apk out/DieBox.apk
+          apksigner verify --verbose --min-sdk-version 24 out/DieBox.apk | head -6
           npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype AAB
           cp android/app/build/outputs/bundle/release/*-signed.aab out/DieBox-PlayStore.aab
           rm -f "$RUNNER_TEMP/release.jks"
