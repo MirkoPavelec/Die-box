@@ -10,7 +10,14 @@
  * Diese Werte sind KEIN Geheimnis – sie stehen in jeder Firebase-Web-App
  * öffentlich. Geschützt wird die Datenbank durch firestore.rules.
  */
-window.FIREBASE_CONFIG = null;
+window.FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCUjldqXcRsokV62BJR2vSyD3KgUFIPrPk",
+  authDomain: "die-box.firebaseapp.com",
+  projectId: "die-box",
+  storageBucket: "die-box.firebasestorage.app",
+  messagingSenderId: "680970820825",
+  appId: "1:680970820825:web:39a5cd6d9d73942715f2c8"
+};
 
 /* Beispiel:
 window.FIREBASE_CONFIG = {
