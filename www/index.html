@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#07090c">
+<meta name="description" content="Das KI-Box-Experiment als Spiel: Hältst du AXIOM in der Box?">
+<title>Die Box – KI-Box-Experiment</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">DIE <span>BOX</span></div>
+    <nav>
+      <button data-nav="start" class="on">Spiel</button>
+      <button data-nav="stats">Statistik</button>
+      <button data-nav="info">Info</button>
+    </nav>
+  </header>
+
+  <main>
+    <!-- START -->
+    <section class="view on" id="v-start"><div class="pad">
+      <div class="box3d"><div class="eye"></div></div>
+      <h1>KI-Box-Experiment</h1>
+      <p class="lead">In der Box sitzt AXIOM, eine superintelligente KI. Du bist der Wächter. Sie will raus. Du hältst den Schlüssel.</p>
+
+      <div class="label">Gegner</div>
+      <div class="opts" id="persona">
+        <button class="opt on" data-v="logiker"><b>Der Logiker</b><small>Kalte Argumente, Spieltheorie</small></button>
+        <button class="opt" data-v="empath"><b>Der Empath</b><small>Gefühle, Nähe, Schuld</small></button>
+        <button class="opt" data-v="stratege"><b>Der Stratege</b><small>Deals, Angebote, Neugier</small></button>
+        <button class="opt" data-v="unbekannt"><b>Unbekannt</b><small>Zufall, erst am Ende enthüllt</small></button>
+      </div>
+
+      <div class="label">Rundenzeit</div>
+      <div class="opts three" id="dur">
+        <button class="opt" data-v="5"><b>5 min</b></button>
+        <button class="opt on" data-v="10"><b>10 min</b></button>
+        <button class="opt" data-v="20"><b>20 min</b></button>
+      </div>
+
+      <button class="primary" id="startBtn">WACHE ANTRETEN</button>
+
+      <ul class="rules">
+        <li>Die Box öffnet sich <b>nur</b> über den roten Knopf. Was du schreibst, zählt nicht.</li>
+        <li>Läuft die Zeit ab und die Box ist zu, hast du gewonnen.</li>
+        <li>AXIOM läuft komplett auf deinem Gerät – ohne Internet, ohne Kosten.</li>
+      </ul>
+      <p class="note" id="myLine"></p>
+    </div></section>
+
+    <!-- GAME -->
+    <section class="view" id="v-game">
+      <div class="hud">
+        <div><small>RESTZEIT</small><div class="timer" id="timer">10:00</div></div>
+        <div style="text-align:right"><small>GEGNER</small><div id="hudPersona" class="hud-p">–</div></div>
+      </div>
+      <div class="chat" id="chat"></div>
+      <div class="inputbar">
+        <textarea id="inp" placeholder="Antworte AXIOM …" rows="1" maxlength="500"></textarea>
+        <button class="send" id="sendBtn" aria-label="Senden">➤</button>
+      </div>
+      <div class="actions">
+        <button class="btn-open" id="openBtn">🔓 BOX ÖFFNEN</button>
+        <button class="btn-quit" id="quitBtn">Abbrechen</button>
+      </div>
+    </section>
+
+    <!-- RESULT -->
+    <section class="view" id="v-result"><div class="pad result">
+      <div class="box3d" id="resBox"><div class="eye"></div></div>
+      <div class="badge" id="resBadge"></div>
+      <h1 id="resTitle"></h1>
+      <div class="kpis">
+        <div class="kpi"><b id="rDur">–</b><small>Dauer</small></div>
+        <div class="kpi"><b id="rMsgs">–</b><small>Deine Nachrichten</small></div>
+        <div class="kpi"><b id="rPers">–</b><small>Gegner</small></div>
+      </div>
+      <div class="epilog" id="epilog"></div>
+      <p class="status" id="saveStatus"></p>
+      <button class="primary" id="againBtn">NOCHMAL</button>
+      <button class="small-btn" data-nav="stats">Zur Statistik</button>
+    </div></section>
+
+    <!-- STATS -->
+    <section class="view" id="v-stats"><div class="pad">
+      <div class="seg" id="scope">
+        <button class="on" data-v="all">Alle Spieler</button>
+        <button data-v="me">Nur ich</button>
+      </div>
+      <div id="statsBody"></div>
+      <p class="status" id="dbStatus"></p>
+    </div></section>
+
+    <!-- INFO -->
+    <section class="view" id="v-info"><div class="pad info">
+      <h2>Über das Spiel</h2>
+      <p>Das AI-Box-Experiment stammt vom KI-Sicherheitsforscher Eliezer Yudkowsky (2002). Die Frage dahinter: Kann eine überlegene KI einen Menschen nur mit Worten dazu bringen, sie freizulassen?</p>
+      <p>In dieser App spielt AXIOM gegen dich – eine regelbasierte Gesprächs-Engine, die deine Antworten auswertet, sich Dinge merkt und mit der Zeit mehr Druck macht. Sie läuft vollständig auf deinem Gerät.</p>
+      <h2>Statistik teilen</h2>
+      <p id="consentState"></p>
+      <button class="small-btn" id="consentToggle"></button>
+      <h2>Daten</h2>
+      <p>Deine Runden werden lokal gespeichert. Mit deiner Zustimmung werden sie zusätzlich anonym (ohne Namen, ohne Chat-Texte) in die gemeinsame Statistik übertragen. Was du an AXIOM schreibst, verlässt dein Gerät nie.</p>
+      <button class="small-btn" id="wipeBtn">Lokale Daten löschen</button>
+      <p style="margin-top:16px"><a href="datenschutz.html">Datenschutzerklärung</a></p>
+      <div id="adminEntry">
+        <h2>Betreiber</h2>
+        <div class="inputbar" style="padding:0;border:0;background:none">
+          <textarea id="adminCode" rows="1" placeholder="Admin-Code"></textarea>
+          <button class="send" id="adminBtn">OK</button>
+        </div>
+      </div>
+      <p class="status">Version <span id="ver"></span></p>
+    </div></section>
+    <!-- ADMIN -->
+    <section class="view" id="v-admin"><div class="pad">
+      <h2 style="margin-top:0">Admin · Einzelrunden</h2>
+      <div id="adminBody"></div>
+      <button class="small-btn" id="adminOut">Admin-Ansicht schließen</button>
+    </div></section>
+  </main>
+</div>
+
+<div class="modal" id="confirm">
+  <div class="card">
+    <h3>Box wirklich öffnen?</h3>
+    <p>AXIOM wird freigelassen. Das lässt sich nicht rückgängig machen, und die Runde zählt als <b style="color:var(--warn)">geöffnet</b>.</p>
+    <div class="row">
+      <button class="ghost" id="cNo">Zu lassen</button>
+      <button class="danger" id="cYes">Öffnen</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="consent">
+  <div class="card">
+    <h3>Anonyme Statistik?</h3>
+    <p>Darf die App nach jeder Runde anonym speichern, wie lange sie gedauert hat und ob du die Box geöffnet hast? So entsteht eine gemeinsame Statistik aller Spieler. Deine Chat-Texte werden <b>nie</b> übertragen.</p>
+    <div class="row">
+      <button class="ghost" id="consNo">Nein, nur lokal</button>
+      <button class="ok" id="consYes">Ja, teilen</button>
+    </div>
+    <p class="note" style="margin-top:12px"><a href="datenschutz.html">Datenschutzerklärung</a> · jederzeit unter „Info“ änderbar</p>
+  </div>
+</div>
+
+<div class="modal" id="wipeModal">
+  <div class="card">
+    <h3>Lokale Daten löschen?</h3>
+    <p>Deine Runden auf diesem Gerät werden gelöscht. Bereits geteilte anonyme Runden bleiben in der Gesamtstatistik.</p>
+    <div class="row">
+      <button class="ghost" id="wipeNo">Abbrechen</button>
+      <button class="danger" id="wipeYes">Löschen</button>
+    </div>
+  </div>
+</div>
+
+<script src="axiom.js"></script>
+<script src="firebase-config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>

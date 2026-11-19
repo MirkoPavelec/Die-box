@@ -1,0 +1,82 @@
+name: Android-App bauen
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HAS_KEY: ${{ secrets.KEYSTORE_BASE64 != '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Abhängigkeiten installieren
+        run: npm install
+
+      - name: Android-Projekt erzeugen
+        run: npx cap add android
+
+      - name: Icons und Startbild erzeugen
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#07090c' --iconBackgroundColorDark '#07090c' --splashBackgroundColor '#07090c' --splashBackgroundColorDark '#07090c'
+
+      - name: Versionsnummer setzen
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"$VER\"/" android/app/build.gradle
+          grep -E "versionCode|versionName" android/app/build.gradle
+
+      - name: Web-Dateien übernehmen
+        run: npx cap sync android
+
+      # Ohne eigenen Schlüssel: Test-APK (zum Ausprobieren)
+      - name: Test-APK bauen
+        if: env.HAS_KEY != 'true'
+        run: |
+          cd android && ./gradlew assembleDebug
+          mkdir -p ../out && cp app/build/outputs/apk/debug/app-debug.apk ../out/DieBox-test.apk
+
+      # Mit eigenem Schlüssel: signierte APK (für Verteilung) + AAB (für den Play Store)
+      - name: Signierte APK und AAB bauen
+        if: env.HAS_KEY == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          mkdir -p out
+          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias "$KEY_ALIAS" --keystorealiaspass "$KEY_PASSWORD" --androidreleasetype APK
+          cp android/app/build/outputs/apk/release/*.apk out/DieBox.apk
+          npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias "$KEY_ALIAS" --keystorealiaspass "$KEY_PASSWORD" --androidreleasetype AAB
+          cp android/app/build/outputs/bundle/release/*.aab out/DieBox-PlayStore.aab
+          rm -f "$RUNNER_TEMP/release.jks"
+
+      - name: Ergebnis hochladen
+        uses: actions/upload-artifact@v4
+        with:
+          name: DieBox-Android
+          path: out/*
+
+      - name: Als Release veröffentlichen (nur bei Tag v*)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: out/*.apk

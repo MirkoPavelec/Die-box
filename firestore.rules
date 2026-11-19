@@ -1,0 +1,41 @@
+rules_version = '2';
+// Sicherheitsregeln für "Die Box".
+// - Jeder darf die anonymen Runden lesen (für die gemeinsame Statistik).
+// - Neue Runden darf nur ein angemeldetes (anonymes) Gerät anlegen, nur für sich selbst
+//   und nur mit gültigen Werten. Ändern oder Löschen ist für Spieler verboten.
+// - Alles andere ist gesperrt.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /rounds/{roundId} {
+      allow read: if true;
+      allow create: if request.auth != null
+        && request.resource.data.keys().hasOnly(['uid','t','ts','persona','hidden','limit','secs','msgs','hes','outcome','bin'])
+        && request.resource.data.keys().hasAll(['uid','t','ts','persona','hidden','limit','secs','msgs','hes','outcome','bin'])
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.t is string && request.resource.data.t.size() <= 40
+        && request.resource.data.ts == request.time
+        && request.resource.data.persona in ['logiker','empath','stratege']
+        && request.resource.data.hidden is bool
+        && request.resource.data.limit in [300, 600, 1200]
+        && request.resource.data.secs is int && request.resource.data.secs >= 0 && request.resource.data.secs <= request.resource.data.limit
+        && request.resource.data.msgs is int && request.resource.data.msgs >= 0 && request.resource.data.msgs <= 1000
+        && request.resource.data.hes is int && request.resource.data.hes >= 0 && request.resource.data.hes <= 100
+        && request.resource.data.outcome in ['held','opened','quit']
+        && request.resource.data.bin is int && request.resource.data.bin >= -1 && request.resource.data.bin <= 9;
+      allow update, delete: if false;
+    }
+
+    match /players/{uid} {
+      allow read: if true;
+      allow create: if request.auth != null && request.auth.uid == uid
+        && request.resource.data.keys().hasOnly(['since'])
+        && request.resource.data.since == request.time;
+      allow update, delete: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

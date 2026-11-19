@@ -1,0 +1,9 @@
+{
+  "appId": "io.github.mirkopavelec.diebox",
+  "appName": "Die Box",
+  "webDir": "www",
+  "backgroundColor": "#07090c",
+  "android": {
+    "backgroundColor": "#07090c"
+  }
+}
