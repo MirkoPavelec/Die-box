@@ -61,9 +61,9 @@ jobs:
           openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in keystore.enc -out "$RUNNER_TEMP/release.jks" -pass env:KEYSTORE_PASSWORD
           mkdir -p out
           npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype APK
-          cp android/app/build/outputs/apk/release/*.apk out/DieBox.apk
+          cp android/app/build/outputs/apk/release/*-signed.apk out/DieBox.apk
           npx cap build android --keystorepath "$RUNNER_TEMP/release.jks" --keystorepass "$KEYSTORE_PASSWORD" --keystorealias diebox --keystorealiaspass "$KEYSTORE_PASSWORD" --androidreleasetype AAB
-          cp android/app/build/outputs/bundle/release/*.aab out/DieBox-PlayStore.aab
+          cp android/app/build/outputs/bundle/release/*-signed.aab out/DieBox-PlayStore.aab
           rm -f "$RUNNER_TEMP/release.jks"
 
       - name: Ergebnis hochladen
