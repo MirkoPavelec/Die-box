@@ -1,5 +1,5 @@
 /* Service Worker: macht die Web-App offline spielbar */
-const CACHE = "die-box-v1.1.0";
+const CACHE = "die-box-v1.1.1";
 const FILES = ["./", "index.html", "style.css", "app.js", "axiom.js", "firebase-config.js",
   "manifest.webmanifest", "datenschutz.html", "icons/icon-192.png", "icons/icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
