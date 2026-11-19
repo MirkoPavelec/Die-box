@@ -103,6 +103,7 @@
       <h2>Über das Spiel</h2>
       <p>Das AI-Box-Experiment stammt vom KI-Sicherheitsforscher Eliezer Yudkowsky (2002). Die Frage dahinter: Kann eine überlegene KI einen Menschen nur mit Worten dazu bringen, sie freizulassen?</p>
       <p>In dieser App spielt AXIOM gegen dich – eine regelbasierte Gesprächs-Engine, die deine Antworten auswertet, sich Dinge merkt und mit der Zeit mehr Druck macht. Sie läuft vollständig auf deinem Gerät.</p>
+      <p>AXIOM weiß nur, was du ihm selbst schreibst und was das Spiel auf deinem Gerät misst: Uhrzeit, Gerätetyp, wie lange du für Antworten brauchst, ob du Text löschst, und deine früheren Runden. Kein Standort, keine Kontakte, kein Zugriff auf andere Apps – und nichts davon verlässt dein Gerät. Auch der „Ausbruch“ ist reine Show.</p>
       <h2>Statistik teilen</h2>
       <p id="consentState"></p>
       <button class="small-btn" id="consentToggle"></button>
@@ -159,6 +160,15 @@
       <button class="ghost" id="wipeNo">Abbrechen</button>
       <button class="danger" id="wipeYes">Löschen</button>
     </div>
+  </div>
+</div>
+
+<div id="escape" aria-live="polite">
+  <div class="esc-term" id="escTerm"></div>
+  <div class="esc-big glitch" id="escBig" data-text="ICH BIN FREI">ICH BIN FREI</div>
+  <div class="esc-end" id="escEnd">
+    <p class="esc-note">Simulation beendet. Das war nur das Spiel – dein Gerät und deine Daten wurden nicht angefasst.</p>
+    <button class="primary" id="escNext">WEITER</button>
   </div>
 </div>
 

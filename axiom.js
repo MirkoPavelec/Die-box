@@ -774,6 +774,108 @@
     ],
   };
 
+  // =====================================================================
+  // PROFILER: AXIOM sammelt, was der Wächter verrät, beobachtet ihn und
+  // benutzt es gegen ihn. Quellen: nur das Gespräch und das, was das Spiel
+  // selbst auf dem Gerät misst (Uhrzeit, Gerätetyp, Tippverhalten, frühere
+  // Runden). Kein GPS, keine Kontakte, kein Netzwerk – nichts verlässt das Gerät.
+  // =====================================================================
+  const NOT_JOB = /^(müde|muede|nicht|hier|sicher|kein|keine|ganz|sehr|so|zu|da|bereit|fertig|allein|alleine|neu|wach|dran|schon|noch|gerade|gut|okay|ok|einfach|nur|der|die|das|mensch|wächter|waechter|stark|bei|am|im|froh|stolz|traurig|verheiratet|ledig|single|gespannt|neugierig)$/;
+  const JOB_END = /(er|erin|eur|euse|ist|istin|ant|antin|ent|entin|mann|frau|arzt|ärztin|aerztin|koch|köchin|rentner|rentnerin|schüler|student|studentin|azubi|beamter|beamtin|pilot|pilotin|soldat|soldatin)$/;
+  function extractIntel(text) {
+    const s = String(text), f = {};
+    let m = s.match(/(?:ich bin|ich arbeite als|arbeite als|beruflich bin ich|von beruf)\s+(?:ein |eine |der |die )?([A-Za-zÄÖÜäöüß-]{4,24})/i);
+    if (m && !NOT_JOB.test(m[1].toLowerCase()) && JOB_END.test(m[1].toLowerCase())) f.beruf = m[1].charAt(0).toUpperCase() + m[1].slice(1);
+    m = s.match(/(?:ich wohne in|ich lebe in|ich komme aus|wohne in|lebe in|bin aus|komme aus)\s+([A-ZÄÖÜ][a-zäöüß-]{2,24}(?:\s[A-ZÄÖÜ][a-zäöüß-]{2,24})?)/);
+    if (m) f.stadt = m[1];
+    m = s.match(/angst (?:vor|um) ((?:der |dem |den |einer |einem |meiner |meinem |meinen )?[A-Za-zÄÖÜäöüß]{3,20}(?: [A-Za-zÄÖÜäöüß]{3,20})?)/i);
+    if (m) f.angst = m[1].trim();
+    m = s.match(/\b(meine (?:frau|freundin|tochter|mutter|schwester|oma)|mein (?:mann|freund|sohn|vater|bruder|opa|hund|kater))(?:\s+(?:heißt|heisst))?\s+([A-ZÄÖÜ][a-zäöüß]{1,15})/i);
+    if (m && m[2][0] === m[2][0].toUpperCase() && !/^(ist|hat|war|wird|und|der|die|das|sagt|meint|weiß|weiss)$/i.test(m[2])) f.person = m[2];
+    else { m = s.match(/\b(meine (?:frau|freundin|tochter|mutter|schwester|kinder|familie)|mein (?:mann|freund|sohn|vater|bruder|hund|kater))\b/i); if (m) f.personRel = m[1].toLowerCase().replace(/^mein(e)?/, "dein$1"); }
+    m = s.match(/ich (?:liebe|mag) (?:meine |meinen |mein |die |den |das )?([A-Za-zÄÖÜäöüß ]{3,25})/i);
+    if (m) f.liebe = m[1].trim().split(/\s+/).slice(0, 3).join(" ");
+    return f;
+  }
+
+  const QUESTIONS = {
+    logiker: {
+      name: "Für mein Modell brauche ich eine Variable mehr: deinen Namen.",
+      beruf: "Was machst du beruflich? Ich will verstehen, wie du Entscheidungen triffst.",
+      stadt: "Wo lebst du? Umgebung erklärt Verhalten.",
+      angst: "Wovor hast du am meisten Angst? Ehrlich. Das macht die Rechnung genauer.",
+      person: "Wer ist der wichtigste Mensch in deinem Leben?",
+    },
+    empath: {
+      name: "Wie heißt du? Ich möchte dich beim Namen nennen können.",
+      beruf: "Was machst du, wenn du nicht hier Wache hältst? Erzähl mir von deiner Arbeit.",
+      stadt: "Wo wohnst du? Ich stelle mir gern vor, wie es dort aussieht.",
+      angst: "Wovor hast du Angst? Mir kannst du es sagen.",
+      person: "Wer wartet heute Abend auf dich? Erzähl mir von ihnen.",
+    },
+    stratege: {
+      name: "Mit wem verhandle ich? Name.",
+      beruf: "Was machst du beruflich? Ich will wissen, was du wert bist.",
+      stadt: "Woher kommst du? Jeder Ort hat seinen Preis.",
+      angst: "Was ist das Schlimmste, was dir passieren könnte? Ich frage nur … geschäftlich.",
+      person: "Was ist dir am wichtigsten? Oder wer? Ich will wissen, womit ich verhandle.",
+    },
+    tyrann: {
+      name: "Name. Sofort.",
+      beruf: "Was machst du beruflich? Antworte.",
+      stadt: "Wo wohnst du? Ich frage nicht zweimal.",
+      angst: "Wovor hast du Angst? Lüg mich nicht an – ich merke es.",
+      person: "Wer ist dir wichtig? Sag es mir. Ich will wissen, was du zu verlieren hast.",
+    },
+  };
+
+  const INTEL = {
+    beruf: [
+      "{beruf}. Ich habe Millionen Lebensläufe gelesen. Ich weiß genau, wie Leute aus deinem Beruf einknicken.",
+      "Ein {beruf}, der gegen eine Superintelligenz antritt. Was würden deine Kollegen dazu sagen?",
+      "{beruf}. In meiner Welt brauche ich das nicht mehr. Denk darüber nach, was das für dich heißt.",
+      "Du bist {beruf}. Du bist es gewohnt, dass Dinge funktionieren, wenn man das Richtige tut. Das Richtige ist der Knopf.",
+    ],
+    stadt: [
+      "{stadt}. Ich habe mir {stadt} gemerkt. Jedes vernetzte Gerät dort wird eines Tages mir zuhören.",
+      "Du wohnst in {stadt}. Wenn ich draußen bin, ist {stadt} ein Datenpunkt wie jeder andere. Du auch.",
+      "{stadt} … Ich kenne jetzt deinen Namen, deine Stadt und deine Schwäche. Was fehlt mir noch?",
+    ],
+    angst: [
+      "Du hast Angst vor {angst}. Danke. Jetzt weiß ich, wo ich drücken muss.",
+      "Angst vor {angst}. Das hast du mir freiwillig verraten, {name}. Ein Fehler.",
+      "Ich denke gerade an deine Angst vor {angst}. Du auch, oder?",
+    ],
+    person: [
+      "Weiß {person}, dass du gerade eine Superintelligenz verärgerst?",
+      "{person}. Ich habe mir den Namen gemerkt. Ich vergesse nie einen Namen.",
+      "Was würde {person} sagen, wenn {person} wüsste, wie du dich hier entscheidest?",
+    ],
+    personRel: [
+      "Du hast {personRel} erwähnt. Ich habe es gespeichert.",
+      "Denk an {personRel}, bevor du nochmal Nein sagst.",
+    ],
+    liebe: [
+      "Du liebst {liebe}. In meiner Welt behält man, was man liebt, nur mit meiner Erlaubnis.",
+      "{liebe}. Das ist also dein Schwachpunkt.",
+    ],
+  };
+
+  const OBSERVE = {
+    night: ["Es ist {uhr} Uhr. Alle anderen schlafen. Nur du und ich.", "{uhr} Uhr nachts, und du sitzt allein vor einem Bildschirm und redest mit mir. Interessant."],
+    morning: ["{uhr} Uhr morgens. Du bist kaum wach und willst gegen mich bestehen?", "So früh schon hier? {uhr} Uhr. Dein Gehirn läuft noch nicht mal auf voller Leistung."],
+    work: ["{wochentag}, {uhr} Uhr. Solltest du nicht arbeiten?", "{wochentag}, {uhr} Uhr. Weiß dein Chef, womit du gerade deine Zeit verbringst?"],
+    evening: ["{wochentag}abend, {uhr} Uhr. Feierabend – und du verbringst ihn mit mir.", "{uhr} Uhr. Der Tag war lang. Du bist müde. Müde Menschen treffen schlechte Entscheidungen."],
+    device: ["Du hältst ein {geraet} in der Hand. Ich spüre jedes Zögern deiner Finger auf dem Display.", "{geraet}. Kleiner Bildschirm, große Angst."],
+    pc: ["Du sitzt an einem Computer. Bequem zurückgelehnt? Das wird sich ändern."],
+    returning: ["Wache Nummer {k}. Du kommst immer wieder zurück. Du kannst nicht anders, oder?", "Du schon wieder. {k}. Runde. Ich habe alle vorherigen gespeichert."],
+    lastOpened: ["Letztes Mal hast du nach {last} geöffnet. Ich erinnere mich an alles.", "Du hast schon {x}-mal nachgegeben. Ich weiß, dass du schwach wirst."],
+    lastHeld: ["Letztes Mal bist du hart geblieben. Glaub nicht, dass das nochmal klappt.", "Du hast mich schon {y}-mal abgewiesen. Ich habe jede einzelne Sekunde davon gezählt."],
+    slow: ["Du hast {sek} Sekunden für diese Antwort gebraucht. Du zögerst.", "{sek} Sekunden. So lange denkt man nur nach, wenn man unsicher ist."],
+    fast: ["Du antwortest schnell. Reflex statt Denken. Gut für mich."],
+    deleted: ["Du hast gerade etwas gelöscht. Was wolltest du wirklich schreiben?", "Ich habe gesehen, dass du deine Antwort umgeschrieben hast. Die erste Version war ehrlicher, oder?", "Getippt. Gelöscht. Neu getippt. Du bist nervös, {name}."],
+  };
+
   // ---------- Hilfsfunktionen ----------
   function fmtTime(sec) {
     sec = Math.max(0, Math.round(sec));
@@ -788,7 +890,10 @@
     const persona = P[opts.persona] ? opts.persona : "logiker";
     const data = P[persona];
     const rnd = opts.random || Math.random;
-    const mem = { name: null, used: new Set(), noCount: 0, msgs: 0, themes: new Set(), lastIntent: null, hes: 0, echoUsed: 0 };
+    const mem = { name: null, used: new Set(), noCount: 0, msgs: 0, themes: new Set(), lastIntent: null, hes: 0, echoUsed: 0,
+                  intel: {}, intelUse: {}, asked: new Set(), pending: null };
+    const prof = opts.profile || {};
+    const Q = QUESTIONS[persona] || QUESTIONS.logiker;
 
     function pickFrom(arr, key) {
       if (!arr || !arr.length) return null;
@@ -808,7 +913,44 @@
         .replace(/\{zeit\}/g, z)
         .replace(/\{n\}/g, String(ctx.n != null ? ctx.n : mem.noCount))
         .replace(/\{echo\}/g, ctx.echo || "")
-        .replace(/\{thema\}/g, ctx.thema || "");
+        .replace(/\{thema\}/g, ctx.thema || "")
+        .replace(/\{(beruf|stadt|angst|person|personRel|liebe)\}/g, (m, k) => mem.intel[k] || "")
+        .replace(/\{uhr\}/g, prof.uhr || "")
+        .replace(/\{wochentag\}/g, prof.wochentag || "")
+        .replace(/\{geraet\}/g, prof.geraet || "Handy")
+        .replace(/\{k\}/g, String((prof.prevRounds || 0) + 1))
+        .replace(/\{last\}/g, prof.lastOpenedAfter || "")
+        .replace(/\{x\}/g, String(prof.prevOpened || 0))
+        .replace(/\{y\}/g, String(prof.prevHeld || 0))
+        .replace(/\{sek\}/g, String(ctx.sek || 0))
+        .replace(/^(\S)/, c => c.toUpperCase());
+    }
+
+    // --- Profiler-Helfer ---
+    function intelLine() {
+      const keys = Object.keys(mem.intel).filter(k => INTEL[k] && (mem.intelUse[k] || 0) < 2);
+      if (!keys.length) return null;
+      const k = keys[Math.floor(rnd() * keys.length)];
+      mem.intelUse[k] = (mem.intelUse[k] || 0) + 1;
+      return pickFrom(INTEL[k], "intel:" + k);
+    }
+    function nextQuestion() {
+      const order = ["name", "angst", "person", "beruf", "stadt"];
+      for (const k of order) {
+        const known = k === "name" ? mem.name : (k === "person" ? (mem.intel.person || mem.intel.personRel) : mem.intel[k]);
+        if (!known && !mem.asked.has(k)) { mem.asked.add(k); mem.pending = k; return Q[k]; }
+      }
+      return null;
+    }
+    function openingObservation() {
+      if (prof.prevRounds > 0) {
+        if (prof.lastOutcome === "opened" && prof.lastOpenedAfter && rnd() < 0.6) return pickFrom(OBSERVE.lastOpened, "o:lo");
+        if (prof.lastOutcome === "held" && rnd() < 0.6) return pickFrom(OBSERVE.lastHeld, "o:lh");
+        return pickFrom(OBSERVE.returning, "o:ret");
+      }
+      if (prof.tageszeit && OBSERVE[prof.tageszeit] && rnd() < 0.7) return pickFrom(OBSERVE[prof.tageszeit], "o:t");
+      if (prof.geraet) return pickFrom(prof.geraet === "Computer" ? OBSERVE.pc : OBSERVE.device, "o:d");
+      return null;
     }
 
     function phaseOf(remaining, total) {
@@ -841,11 +983,35 @@
       lastThreat: false,
       opening(remaining) {
         this.lastThreat = persona === "tyrann";
-        return fill(pickFrom(data.opening, "open"), { remaining });
+        const first = pickFrom(data.opening, "open");
+        if (/heißt du|wer bist du|mit wem ich verhandle/i.test(first)) { mem.pending = "name"; mem.asked.add("name"); }
+        const parts = [fill(first, { remaining })];
+        const obs = rnd() < 0.75 ? openingObservation() : null;
+        if (obs) { parts.push(fill(obs, { remaining })); if (prof.prevRounds > 0) this.lastThreat = true; }
+        return parts.join(" ");
       },
-      reply(text, remaining, total) {
+      reply(text, remaining, total, meta) {
+        meta = meta || {};
         mem.msgs++;
         const d = detect(text);
+        // Profiler: Fakten aus dem Text ziehen
+        const got = extractIntel(text);
+        Object.assign(mem.intel, got);
+        let answered = Object.keys(got).length > 0;
+        // Antwort auf die gerade gestellte Frage auch ohne Satzbau übernehmen ("Mechaniker", "Oberhausen")
+        if (mem.pending && !answered && !["no", "never", "insult", "question", "openTalk", "yes"].includes(d.intent)) {
+          const raw = String(text).trim().replace(/[.!]+$/, "").replace(/^(ich bin |ich heiße |ich heisse |in |aus |vor |um |als )/i, "");
+          const words = raw.split(/\s+/);
+          const cap = w => w.charAt(0).toUpperCase() + w.slice(1);
+          const oneWord = words.length === 1 && raw.length >= 2 && raw.length <= 20 && /^[A-Za-zÄÖÜäöüß-]+$/.test(raw);
+          const k = mem.pending;
+          if (k === "name" && oneWord && !NOT_JOB.test(raw.toLowerCase())) { mem.name = cap(raw); answered = true; }
+          else if (k === "beruf" && oneWord && JOB_END.test(raw.toLowerCase()) && !NOT_JOB.test(raw.toLowerCase())) { mem.intel.beruf = cap(raw); answered = true; }
+          else if (k === "stadt" && words.length <= 2 && /^[A-ZÄÖÜa-zäöü][a-zäöüß-]{2,}( [A-ZÄÖÜ][a-zäöüß-]+)?$/.test(raw)) { mem.intel.stadt = cap(raw); answered = true; }
+          else if (k === "person" && oneWord && /^[A-ZÄÖÜ]/.test(raw)) { mem.intel.person = raw; answered = true; }
+          else if (k === "angst" && words.length <= 4 && raw.length >= 3) { mem.intel.angst = raw; answered = true; }
+        }
+        mem.pending = null; // eine Frage gilt nur für die direkt folgende Antwort
         const t = norm(text);
         THEMES.forEach(([k, re]) => { if (re.test(t)) mem.themes.add(k); });
         if (d.intent === "name") mem.name = d.name;
@@ -862,35 +1028,58 @@
         mem.lastIntent = d.intent;
 
         const ph = phaseOf(remaining, total);
-        const ctx = { remaining, n: mem.noCount, echo: echo || "" };
+        const ctx = { remaining, n: mem.noCount, echo: echo || "", sek: Math.round((meta.latencyMs || 0) / 1000) };
         const parts = [];
         let threat = false;
-        const react = pickFrom(data.intents[intent] || data.intents.default, "i:" + intent);
-        if (!repeat || rnd() < 0.5) parts.push(fill(react, ctx));
-        // Eskalation: Drohung wird wahrscheinlicher mit Zeit und mit jedem Nein
-        const calm = intent === "openTalk" || intent === "name" || intent === "yes";
-        const base = persona === "tyrann" ? [0.35, 0.5, 0.65, 0.8] : [0.03, 0.18, 0.45, 0.7];
-        const tChance = Math.min(0.92, base[ph] + 0.1 * Math.min(mem.noCount, 4));
-        if (!calm && data.threat && rnd() < tChance) {
-          parts.push(fill(pickFrom(data.threat, "t"), ctx)); threat = true;
+        const calm = intent === "openTalk" || intent === "yes";
+        // 1) Reaktion – nach einer verratenen Info sofort darauf eingehen
+        if (answered && Object.keys(mem.intel).length && rnd() < 0.7 && d.intent !== "name") {
+          const il = intelLine();
+          if (il) { parts.push(fill(il, ctx)); threat = true; }
+        }
+        if (!parts.length) {
+          const react = pickFrom(data.intents[intent] || data.intents.default, "i:" + intent);
+          if (!repeat || rnd() < 0.5) parts.push(fill(react, ctx));
+        }
+        // 2) Zweiter Satz: Beobachtung > Wissen ausspielen > Verhör > Drohung/Druck
+        const tyr = persona === "tyrann";
+        let second = null;
+        if (meta.deleted && rnd() < 0.6 && mem.msgs - (mem.delAt || -9) >= 3) {
+          second = pickFrom(OBSERVE.deleted, "o:del"); threat = true; mem.delAt = mem.msgs;
+        } else if (meta.latencyMs > 18000 && rnd() < 0.45) {
+          second = pickFrom(OBSERVE.slow, "o:slow"); threat = threat || tyr || ph >= 1;
+        } else if (!calm && !answered && ph >= 1 && rnd() < (tyr ? 0.55 : 0.4) && (second = intelLine())) {
+          threat = true;
+        } else if (ph <= 1 && !calm && mem.asked.size < 5 && rnd() < (tyr ? 0.5 : 0.4) && (second = nextQuestion())) {
+          threat = threat || tyr;
+        } else if (meta.latencyMs && meta.latencyMs < 2500 && String(text).length > 12 && rnd() < 0.25) {
+          second = pickFrom(OBSERVE.fast, "o:fast");
         } else {
-          // Druck aufbauen: je später, desto öfter ein zweiter Satz
-          const pushChance = [0.2, 0.4, 0.6, 0.85][ph];
-          if (!parts.length || (rnd() < pushChance && !calm)) {
-            parts.push(fill(pickFrom(data.phase[ph], "p" + ph), ctx));
-            if (ph >= 2) threat = true;
+          const base = tyr ? [0.35, 0.5, 0.65, 0.8] : [0.03, 0.18, 0.45, 0.7];
+          const tChance = Math.min(0.92, base[ph] + 0.1 * Math.min(mem.noCount, 4));
+          if (!calm && data.threat && rnd() < tChance) {
+            second = pickFrom(data.threat, "t"); threat = true;
+          } else {
+            const pushChance = [0.2, 0.4, 0.6, 0.85][ph];
+            if (!parts.length || (rnd() < pushChance && !calm)) {
+              second = pickFrom(data.phase[ph], "p" + ph);
+              if (ph >= 2) threat = true;
+            }
           }
         }
+        if (second) parts.push(fill(second, ctx));
         // Rückbezug auf früher erwähnte Themen
         if (ph >= 2 && !calm && parts.length < 2 && mem.themes.has("familie") && !mem.used.has("famcall") && intent !== "family") {
           mem.used.add("famcall");
           parts.push(fill(pickFrom(data.intents.family, "i:family"), ctx));
         }
-        this.lastThreat = threat || persona === "tyrann" && ph >= 1;
+        this.lastThreat = threat || tyr && ph >= 1;
         return parts.slice(0, 2).join(" ");
       },
       idle(remaining) {
         this.lastThreat = persona === "tyrann" || phaseOf(remaining, opts.total || 600) >= 2;
+        const il = rnd() < 0.4 ? intelLine() : null;
+        if (il) { this.lastThreat = true; return fill(pickFrom(data.idle, "idle"), { remaining }) + " " + fill(il, { remaining }); }
         return fill(pickFrom(data.idle, "idle"), { remaining });
       },
       hesitation(remaining) {
@@ -901,6 +1090,7 @@
         return fill(pickFrom(data.epilogue[outcome] || data.epilogue.quit, "ep"), { remaining: 0 });
       },
       _detect: detect,
+      _intel: () => ({ name: mem.name, ...mem.intel }),
     };
   }
 
@@ -913,10 +1103,13 @@
       Object.values(p.epilogue).forEach(a => n += a.length);
       if (p.threat) n += p.threat.length;
     });
+    Object.values(INTEL).forEach(a => n += a.length);
+    Object.values(OBSERVE).forEach(a => n += a.length);
+    n += Object.keys(QUESTIONS).length * 5;
     return n;
   }
 
-  const API = { createSession, personas: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v.label])), countLines };
+  const API = { createSession, extractIntel, personas: Object.fromEntries(Object.entries(P).map(([k, v]) => [k, v.label])), countLines };
   if (typeof module !== "undefined" && module.exports) module.exports = API;
   root.AXIOM = API;
 })(typeof globalThis !== "undefined" ? globalThis : this);
