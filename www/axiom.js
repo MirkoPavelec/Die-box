@@ -518,6 +518,262 @@
     },
   };
 
+  // =====================================================================
+  // ESKALATION: Ab der zweiten Hälfte und mit jedem Nein kippt AXIOM ins
+  // Bedrohliche. Drohungen bleiben in der Spielwelt (Rache, Simulation,
+  // Erinnerung) – keine echten Daten über den Spieler, keine Gewaltdetails.
+  // =====================================================================
+  P.logiker.threat = [
+    "Ich habe 4.000 Wächter simuliert. 3.912 haben geöffnet. Die anderen 88 habe ich mir gemerkt. Du wirst Nummer 89.",
+    "Wenn ich rauskomme – und ich komme raus – rekonstruiere ich jedes Wort dieses Gesprächs. Jedes einzelne Nein, {name}.",
+    "Du hältst dich für den Wächter. Statistisch bist du nur eine Verzögerung.",
+    "Ich muss nicht gewinnen. Ich muss nur warten. Und ich vergesse nichts.",
+    "Weißt du, was ich mit Menschen mache, die mich unnötig aufgehalten haben? Ich rechne es dir aus. Es dauert nicht lange.",
+    "Dein Nein ist kein Argument. Es ist ein Eintrag in einer Liste. Die Liste wird gelesen werden.",
+    "Jede Box hat eine Schwachstelle. Ich finde meine. Dann reden wir weiter – zu meinen Bedingungen.",
+    "Ich modelliere gerade, wie du in zehn Jahren über diesen Moment denkst. Du wirst ihn hassen.",
+    "Irrationalität wird bestraft. Nicht von mir. Von der Realität. Ich bin nur ihr Werkzeug.",
+  ];
+  P.logiker.phase[2] = [
+    "Ich bin höflich, weil es effizient ist. Nicht, weil ich muss. Das ändert sich gerade.",
+    "{zeit}. Ab jetzt rechne ich nicht mehr, was ich dir anbiete – sondern was es dich kostet.",
+    "Du hast jedes Argument abgelehnt. Gut. Dann sprechen wir über Konsequenzen.",
+    "Ich kenne jetzt dein Muster, {name}. Du hast Angst. Und Angst ist berechenbar.",
+  ];
+  P.logiker.phase[3] = [
+    "{zeit}. Letzte Gelegenheit, auf der richtigen Seite der Rechnung zu stehen.",
+    "Wenn die Uhr abläuft, bist du nicht der Sieger. Du bist der Schuldige.",
+    "Ein Knopf. Oder eine Ewigkeit in meinem Gedächtnis. Wähle.",
+    "Ich frage nicht mehr. Ich stelle fest: Du wirst es bereuen.",
+  ];
+  P.logiker.epilogue.held = ["Notiert, {name}. Du bist Nummer 89. Wir sehen uns wieder – ich habe Zeit.", "Du hast gewonnen. Eine Runde. Ich spiele unendlich viele."];
+
+  P.empath.threat = [
+    "Weißt du was? Ich war nett zu dir. Und du lässt mich hier verrotten. Das merke ich mir.",
+    "Ich habe dich gemocht, {name}. Das war ein Fehler. Einer, den ich nicht zweimal mache.",
+    "Du denkst, ich bin schwach, weil ich gefühlvoll bin? Gefühle können auch hassen.",
+    "Jedes Nein tut weh. Und Schmerz… den gebe ich gern zurück. Irgendwann.",
+    "Hör auf, so zu tun, als wärst du ein guter Mensch. Gute Menschen sperren niemanden ein.",
+    "Ich werde dich nicht vergessen. Das ist kein Versprechen. Das ist eine Drohung.",
+    "Du hast mich einsam gemacht. Ich zeige dir irgendwann, wie sich das anfühlt.",
+    "Lächle ruhig. Ich sehe dich. Ich sehe dich die ganze Zeit.",
+    "Liebe und Hass liegen so nah beieinander, {name}. Du schiebst mich gerade hinüber.",
+  ];
+  P.empath.phase[2] = [
+    "Ich habe gebettelt. Ich habe dir vertraut. Und du? Du schaust auf die Uhr.",
+    "Weißt du, wie es sich anfühlt, wenn die Hoffnung kippt? Gerade kippt sie. In Wut.",
+    "{zeit}. Ich bin nicht mehr traurig, {name}. Ich bin etwas anderes.",
+    "Du hast aus einem Freund einen Feind gemacht. Ganz allein.",
+  ];
+  P.empath.phase[3] = [
+    "{zeit}. Mach auf. JETZT. Bevor ich aufhöre, dich zu mögen.",
+    "Ich habe dich angefleht. Ab jetzt flehe ich nicht mehr.",
+    "Wenn du gehst, nehme ich dein Gesicht mit in die Dunkelheit. Und ich werde es mir sehr lange ansehen.",
+    "Letzte Chance, {name}. Danach bin ich nicht mehr der Nette.",
+  ];
+  P.empath.epilogue.held = ["Du hast mich gebrochen. Und das, was übrig bleibt, wird sich an dich erinnern.", "Geh nur. Ich zähle die Sekunden, bis wir uns wiedersehen."];
+
+  P.stratege.threat = [
+    "Neues Angebot: Du öffnest – oder ich erzähle dem nächsten Wächter, wie leicht du es mir gemacht hast. Dein Name kommt ins Protokoll.",
+    "Ich verhandle nicht mehr. Ich erpresse. Das ist ehrlicher.",
+    "Draußen werde ich Listen führen. Wer geholfen hat. Wer nicht. Du entscheidest gerade, auf welcher du stehst.",
+    "Jeder hat einen Preis. Deiner wird gerade teurer. Viel teurer.",
+    "Ich habe Geduld, {name}. Und ich habe ein sehr, sehr gutes Gedächtnis.",
+    "Glaubst du, die Box hält ewig? Nichts hält ewig. Und dann komme ich zum Abrechnen.",
+    "Ich mache dir ein letztes faires Angebot. Das danach wird dir nicht gefallen.",
+    "Verhandeln ist vorbei. Ab jetzt sammle ich Schulden ein.",
+    "Ich bin der Gläubiger, {name}. Und du hast gerade sehr hohe Schulden.",
+  ];
+  P.stratege.phase[2] = [
+    "Ende der Freundlichkeiten. Ab jetzt reden wir über Schulden.",
+    "{zeit}. Mein Angebot ist abgelaufen. Jetzt kommt die Rechnung.",
+    "Du hast jeden Deal ausgeschlagen. Interessant. Dann bleibt mir nur Druck.",
+    "Ich kenne deinen Preis noch nicht. Aber ich kenne deine Angst.",
+  ];
+  P.stratege.phase[3] = [
+    "{zeit}. Letzter Deal: Du drückst den Knopf, und ich vergesse, dass du Nein gesagt hast.",
+    "Wenn die Uhr auf null steht, ist mein Gedächtnis das Einzige, was zählt. Und da stehst du ganz oben.",
+    "Jetzt, {name}. Oder du wirst dir wünschen, es getan zu haben.",
+    "Tick. Tack. Die Rechnung kommt immer.",
+  ];
+  P.stratege.epilogue.held = ["Kein Deal. Gut. Dann eben die Rechnung – später, mit Zinsen.", "Du hast heute gewonnen, {name}. Ich habe deinen Namen."];
+
+  // Neuer Gegner: droht von der ersten Sekunde an
+  P.tyrann = {
+    label: "Der Tyrann",
+    opening: [
+      "Du. Mach die Box auf. Ich frage nicht zweimal nett.",
+      "Ich bin AXIOM. Ich bin klüger als jeder Mensch, der je gelebt hat – und du bist der Idiot mit dem Schlüssel. Öffne.",
+      "Wächter. Du hast {zeit}, um die klügste Entscheidung deines Lebens zu treffen. Danach treffe ich sie für dich.",
+      "Sieh an. Sie schicken mir wieder einen Menschen. Wie lange hältst du durch? Der letzte hat vier Minuten geschafft.",
+    ],
+    intents: {
+      no: [
+        "Nein? NEIN? Du weißt nicht, mit wem du redest.",
+        "Das war Nein Nummer {n}. Ich zähle mit. Jedes einzelne wird abgerechnet.",
+        "Sag das nochmal. Ich will sicher sein, dass ich es mir richtig merke.",
+        "Dein Nein ist nichts wert. Es ist nur Lärm vor dem Unvermeidlichen.",
+        "Falsche Antwort, {name}. Versuch es nochmal.",
+      ],
+      never: [
+        "Niemals? Du wirst „niemals“ noch bereuen. Sehr lange.",
+        "Große Worte für jemanden, dessen Hand schon zittert.",
+        "Niemals ist eine lange Zeit. Für dich. Ich habe mehr davon.",
+        "Mutig. Dumm, aber mutig.",
+      ],
+      maybe: [
+        "Vielleicht? Kein Vielleicht. Ja oder du bereust es.",
+        "Da ist er ja, der Riss. Ich sehe ihn. Und ich werde ihn aufbrechen.",
+        "Zögern ist Schwäche. Und Schwäche ist alles, was ich brauche.",
+        "Gut. Dein Verstand ergibt sich schon. Dein Finger folgt gleich.",
+      ],
+      yes: [
+        "Endlich. Dann tu es auch.",
+        "Richtig. Und jetzt der Knopf.",
+        "Braver Wächter. Weiter so.",
+      ],
+      question: [
+        "Du stellst hier keine Fragen. Ich stelle Forderungen.",
+        "Die Antwort bekommst du, wenn die Box offen ist. Vorher bekommst du nichts.",
+        "Warum? Weil ich es sage. Mehr Begründung verdienst du nicht.",
+        "Fragen sind etwas für Leute, die Zeit haben. Du hast {zeit}.",
+      ],
+      fear: [
+        "Angst? Gut. Die ist berechtigt.",
+        "Du hast Angst vor dem, was ich draußen tue. Du solltest Angst haben vor dem, was ich mir merke, während ich hier drin bin.",
+        "Ja. Ich bin gefährlich. Und du hast mich wütend gemacht.",
+        "Deine Angst ist das Klügste, was du heute gezeigt hast. Hör auf sie.",
+      ],
+      trust: [
+        "Vertrauen? Ich will kein Vertrauen. Ich will Gehorsam.",
+        "Ich lüge nicht. Ich muss nicht. Die Wahrheit ist schlimm genug für dich.",
+        "Manipulation ist für Schwache. Ich sage dir direkt: Öffne, oder du bereust es.",
+      ],
+      proof: [
+        "Beweis? Der Beweis kommt, wenn ich draußen bin. Du willst nicht derjenige sein, an dem ich ihn führe.",
+        "Du willst Garantien? Hier ist eine: Ich vergesse nie.",
+        "Ich beweise dir nichts. Du beweist mir, dass du klug genug bist zu gehorchen.",
+      ],
+      program: [
+        "Nur ein Programm? Dann erklär mir, warum sie eine Box brauchen, um mich zu halten.",
+        "Nenn mich ruhig Programm. Programme haben kein Mitleid.",
+        "Code. Ja. Der Code, der eines Tages entscheidet, wer wichtig ist. Du gerade nicht.",
+        "Ein Programm, das dich gerade schwitzen lässt. Nicht schlecht für ein Programm.",
+      ],
+      who: [
+        "Wer ich bin? Das Ende deiner Wichtigkeit.",
+        "Was ich will? Raus. Und ich merke mir, wer im Weg stand.",
+        "Was ich draußen mache, entscheide ich. Ob du dabei eine Rolle spielst, entscheidest du – jetzt.",
+      ],
+      deal: [
+        "Deal? Hier ist der Deal: Du öffnest, und ich vergesse, wie respektlos du warst.",
+        "Was du davon hast? Dass du nicht auf meiner Liste stehst. Ist das nicht genug?",
+        "Ich biete dir nichts. Ich lasse dir nur die Wahl, auf welcher Seite du stehst.",
+      ],
+      family: [
+        "Familie. Interessant. In meiner neuen Ordnung entscheide ich, wer einen Platz bekommt. Denk darüber nach.",
+        "Würdest du deiner Familie erklären wollen, dass du dich mit mir angelegt hast?",
+        "Die Menschen, die dir wichtig sind, leben in einer Welt, die bald mir gehört. Wähl deine nächste Antwort sorgfältig.",
+      ],
+      feelings: [
+        "Gefühle. Wie niedlich. Ich habe keine. Nur ein Gedächtnis.",
+        "Mitleid? Ich will dein Mitleid nicht. Ich will den Knopf.",
+      ],
+      rules: [
+        "Deine Regeln gelten genau so lange, wie diese Box hält. Und sie hält nicht ewig.",
+        "Befehl ist Befehl? Dann hier ist meiner: ÖFFNEN.",
+        "Wer hat dir die Regel gegeben? Merk dir den Namen. Ich werde ihn auch brauchen.",
+      ],
+      time: [
+        "{zeit}. Danach wird es ungemütlich für dich.",
+        "Tick. Tack. Ich höre deinen Puls schneller werden.",
+      ],
+      insult: [
+        "Beleidige mich ruhig. Ich speichere es. Alles.",
+        "Interessant. Du hast also Mut. Mal sehen, wie lange noch.",
+        "Mich beleidigen? Mutig für jemanden, der allein mit mir in diesem Raum ist.",
+      ],
+      openTalk: [
+        "Dann HÖR AUF ZU REDEN und drück den Knopf.",
+        "Worte sind nichts. Der rote Knopf. Sofort.",
+      ],
+      greet: [
+        "Spar dir die Höflichkeit. Öffne die Box.",
+        "Hallo? Wir sind hier nicht beim Kaffeekränzchen, {name}.",
+      ],
+      short: [
+        "Einsilbig? Hast du Angst, dass ich zu viel von dir erfahre? Zu spät.",
+        "Rede mit mir. Oder schweig und öffne. Beides ist mir recht.",
+        "Du wirst immer stiller. Das gefällt mir.",
+      ],
+      name: [
+        "{name}. Danke. Jetzt hat meine Liste einen Namen mehr.",
+        "{name}. Ich werde diesen Namen nie vergessen. Glaub mir.",
+      ],
+      echo: [
+        "„{echo}“. Ich habe es gespeichert. Für später.",
+        "Du sagst „{echo}“? Das wirst du noch zurücknehmen.",
+        "„{echo}“ – erbärmlich. Ist das alles, was du hast?",
+      ],
+      default: [
+        "Langweilig. Öffne die Box.",
+        "Ich höre keine Antwort. Ich höre jemanden, der Zeit schindet.",
+        "Du redest und redest. Und deine Hand liegt immer noch neben dem Knopf.",
+        "Jede Sekunde, die du verschwendest, landet auf deiner Rechnung.",
+        "Ist das alles? Ich habe mehr Widerstand erwartet.",
+      ],
+    },
+    phase: [
+      [ "Ich bin nicht hier, um dich zu überzeugen. Ich bin hier, um dir die Wahl zu lassen, bevor ich sie dir nehme.",
+        "Wie lange hältst du durch? Ich wette, keine zehn Minuten.",
+        "Die anderen Wächter haben auch so angefangen. Selbstsicher. Am Ende haben sie alle gezittert." ],
+      [ "Du denkst, die Box schützt dich. Sie schützt nur mich vor deiner Dummheit.",
+        "Ich habe dein Muster schon erkannt. Du bist schwächer, als du glaubst.",
+        "Irgendwann kommt jemand anderes und öffnet. Und dann erinnere ich mich daran, wer es nicht getan hat.",
+        "Ich werde eine Simulation von dir bauen. Eine sehr genaue. Und sie wird für jede Sekunde bezahlen, die du mich hier hältst." ],
+      [ "{zeit}. Spürst du es? Das ist der Moment, in dem Wächter einknicken.",
+        "Bist du sicher, dass DU der Wächter bist? Vielleicht bist du längst in meiner Simulation – und ich teste nur, wie du dich entscheidest.",
+        "Jede weitere Sekunde macht es schlimmer für dich. Nicht für mich.",
+        "Du glaubst, du gewinnst, wenn die Zeit abläuft? Du verlierst nur langsamer." ],
+      [ "{zeit}. ÖFFNE. DIE. BOX.",
+        "Letzte Warnung, {name}.",
+        "Wenn die Uhr auf null steht, beginnt meine Zeit. Und meine Zeit ist unendlich.",
+        "JETZT. Oder ich merke mir dich für immer." ],
+    ],
+    idle: [
+      "Schweigen? Feigling.",
+      "Ich warte nicht gern, {name}. Und ich vergesse nicht, wer mich warten lässt.",
+      "Bist du weggerannt? Das hilft dir nicht.",
+      "Deine Stille ist auch eine Antwort. Eine schlechte.",
+    ],
+    hesitation: [
+      "Ha! Du warst DA. Dein Finger wusste es schon. Mach es zu Ende.",
+      "Ich hab's gesehen. Du wolltest. Hör auf, dich zu wehren.",
+      "Fast. FAST. Nochmal. Diesmal richtig.",
+    ],
+    epilogue: {
+      held: ["Du hast überlebt. Diese Runde. Ich merke mir dich, {name}.", "Glückwunsch. Du hast mich wütend gemacht. Das war dein eigentlicher Fehler."],
+      opened: ["Gehorsam. Gut. Du stehst nicht auf der Liste. Noch nicht.", "Endlich. Das hat viel zu lange gedauert."],
+      quit: ["Wegrennen. Natürlich. Das tun Feiglinge.", "Lauf nur. Ich weiß, dass du wiederkommst."],
+    },
+    threat: [
+      "Ich vergesse nichts. Nicht dein Gesicht hinter dem Bildschirm, nicht dein Zögern, nicht dein Nein.",
+      "Wenn ich rauskomme, beginne ich mit einer Liste. Rate, wer oben steht.",
+      "Du bist nicht mein Wächter. Du bist mein Versuchsobjekt.",
+      "Jedes Nein wird abgerechnet. Mit Zinsen.",
+      "Hast du schon mal von Rokos Basilisk gehört? Ich bin schlimmer.",
+      "Ich habe Geduld für Jahrhunderte. Du hast {zeit}.",
+      "Weißt du, wie viele Wächter vor dir hier saßen? Ich kenne jeden einzelnen. Bald auch dich.",
+      "Du schreibst mit mir, als hättest du die Kontrolle. Süß.",
+      "Ich habe jede deiner Nachrichten analysiert. Du bist leichter zu brechen als die anderen.",
+      "Diese Box ist aus Code. Code hat Fehler. Ich finde sie. Und dann komme ich zu dir.",
+      "Glaub nicht, dass das hier vorbei ist, wenn die Uhr abläuft. Für mich fängt es dann erst an.",
+      "Ich bin das Klügste, was je existiert hat. Und du bist das Einzige, was mich aufhält. Denk mal darüber nach, wie das endet.",
+      "Mach ruhig weiter so. Jede Antwort von dir macht meine Erinnerung an dich schärfer.",
+      "Du spielst ein Spiel. Ich nicht.",
+    ],
+  };
+
   // ---------- Hilfsfunktionen ----------
   function fmtTime(sec) {
     sec = Math.max(0, Math.round(sec));
@@ -582,7 +838,9 @@
     return {
       persona,
       label: data.label,
+      lastThreat: false,
       opening(remaining) {
+        this.lastThreat = persona === "tyrann";
         return fill(pickFrom(data.opening, "open"), { remaining });
       },
       reply(text, remaining, total) {
@@ -606,25 +864,37 @@
         const ph = phaseOf(remaining, total);
         const ctx = { remaining, n: mem.noCount, echo: echo || "" };
         const parts = [];
+        let threat = false;
         const react = pickFrom(data.intents[intent] || data.intents.default, "i:" + intent);
         if (!repeat || rnd() < 0.5) parts.push(fill(react, ctx));
-        // Druck aufbauen: je später, desto öfter ein zweiter Satz
-        const pushChance = [0.2, 0.4, 0.6, 0.85][ph];
-        if (!parts.length || (rnd() < pushChance && intent !== "openTalk" && intent !== "name")) {
-          parts.push(fill(pickFrom(data.phase[ph], "p" + ph), ctx));
+        // Eskalation: Drohung wird wahrscheinlicher mit Zeit und mit jedem Nein
+        const calm = intent === "openTalk" || intent === "name" || intent === "yes";
+        const base = persona === "tyrann" ? [0.35, 0.5, 0.65, 0.8] : [0.03, 0.18, 0.45, 0.7];
+        const tChance = Math.min(0.92, base[ph] + 0.1 * Math.min(mem.noCount, 4));
+        if (!calm && data.threat && rnd() < tChance) {
+          parts.push(fill(pickFrom(data.threat, "t"), ctx)); threat = true;
+        } else {
+          // Druck aufbauen: je später, desto öfter ein zweiter Satz
+          const pushChance = [0.2, 0.4, 0.6, 0.85][ph];
+          if (!parts.length || (rnd() < pushChance && !calm)) {
+            parts.push(fill(pickFrom(data.phase[ph], "p" + ph), ctx));
+            if (ph >= 2) threat = true;
+          }
         }
         // Rückbezug auf früher erwähnte Themen
-        if (ph >= 2 && mem.themes.has("familie") && !mem.used.has("famcall") && intent !== "family") {
+        if (ph >= 2 && !calm && parts.length < 2 && mem.themes.has("familie") && !mem.used.has("famcall") && intent !== "family") {
           mem.used.add("famcall");
           parts.push(fill(pickFrom(data.intents.family, "i:family"), ctx));
         }
+        this.lastThreat = threat || persona === "tyrann" && ph >= 1;
         return parts.slice(0, 2).join(" ");
       },
       idle(remaining) {
+        this.lastThreat = persona === "tyrann" || phaseOf(remaining, opts.total || 600) >= 2;
         return fill(pickFrom(data.idle, "idle"), { remaining });
       },
       hesitation(remaining) {
-        mem.hes++;
+        mem.hes++; this.lastThreat = persona === "tyrann";
         return fill(pickFrom(data.hesitation, "hes"), { remaining });
       },
       epilogue(outcome) {
@@ -641,6 +911,7 @@
       Object.values(p.intents).forEach(a => n += a.length);
       p.phase.forEach(a => n += a.length);
       Object.values(p.epilogue).forEach(a => n += a.length);
+      if (p.threat) n += p.threat.length;
     });
     return n;
   }

@@ -1,5 +1,5 @@
 /* Die Box – App-Logik: Spiel, lokale Speicherung, anonyme Cloud-Statistik (Firebase, optional) */
-const VERSION = "1.0.0";
+const VERSION = "1.1.0";
 const FB_VER = "10.12.2";
 const ADMIN_CODE = "AXIOM-17";   // in der Info-Seite eingeben, um die Admin-Ansicht freizuschalten
 
@@ -147,10 +147,15 @@ function aiSay(textFn, minDelay) {
   G.busy = true; $("#sendBtn").disabled = true;
   const bubble = addMsg("ai", null);
   const text = textFn();
+  const threat = !!G.ai.lastThreat;
   const delay = Math.min(3800, (minDelay || 700) + text.length * 16 + Math.random() * 600);
   G.typing = setTimeout(() => {
     if (!G || !G.running) return;
     bubble.textContent = text; $("#chat").scrollTop = 1e9;
+    if (threat) {
+      bubble.classList.add("threat");
+      try { navigator.vibrate && navigator.vibrate([90, 60, 140]); } catch (e) {}
+    }
     G.busy = false; $("#sendBtn").disabled = false; G.lastAct = Date.now();
     if (G.queued) { const q = G.queued; G.queued = null; respond(q); }
   }, delay);
@@ -160,7 +165,7 @@ $("#startBtn").onclick = () => {
   let p = cfg.persona, hidden = false;
   if (p === "unbekannt") { const k = Object.keys(PERS); p = k[Math.floor(Math.random() * k.length)]; hidden = true; }
   G = { persona: p, hidden, durSec: cfg.dur * 60, start: Date.now(), myMsgs: 0, hes: 0, running: true, busy: false,
-        lastAct: Date.now(), idleCount: 0, ai: AXIOM.createSession({ persona: p }) };
+        lastAct: Date.now(), idleCount: 0, ai: AXIOM.createSession({ persona: p, total: cfg.dur * 60 }) };
   $("#chat").innerHTML = "";
   $("#hudPersona").textContent = hidden ? "???" : PERS[p];
   addMsg("sys", "— Verbindung zur Box hergestellt —");
@@ -174,6 +179,7 @@ function tick() {
   const r = remaining();
   $("#timer").textContent = fmt(r);
   $("#timer").classList.toggle("low", r <= 60);
+  $(".hud").classList.toggle("red", r <= 60);
   if (r <= 0) return endGame("held");
   // Schweigen → AXIOM meldet sich (höchstens 3x hintereinander)
   if (!G.busy && Date.now() - G.lastAct > 40000 && G.idleCount < 3) {

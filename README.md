@@ -12,7 +12,7 @@ Die App sammelt anonym, **wie lange gespielt wird** und **ob geöffnet oder hart
 | Datei / Ordner | Zweck |
 |---|---|
 | `www/` | Die komplette App (läuft im Browser **und** als Android-App) |
-| `www/axiom.js` | Der Offline-Gegner AXIOM: 3 Persönlichkeiten, ca. 300 Sätze, erkennt rund 20 Absichten (Nein, Angst, Beweis, Deal, Familie …), merkt sich deinen Namen, spiegelt deine Worte, steigert den Druck mit der Restzeit, reagiert auf Schweigen und auf Zögern am Knopf |
+| `www/axiom.js` | Der Offline-Gegner AXIOM: 4 Gegner (inkl. „Der Tyrann“), ca. 450 Sätze, eskaliert mit jedem Nein ins Bedrohliche, erkennt rund 20 Absichten (Nein, Angst, Beweis, Deal, Familie …), merkt sich deinen Namen, spiegelt deine Worte, steigert den Druck mit der Restzeit, reagiert auf Schweigen und auf Zögern am Knopf |
 | `www/app.js` | Spiel, lokale Speicherung, Einwilligung, Statistik, Admin-Ansicht |
 | `www/firebase-config.js` | Hier kommen deine Firebase-Zugangsdaten rein (Schritt 2) |
 | `www/datenschutz.html` | Datenschutzerklärung (Platzhalter in `[ECKIGEN KLAMMERN]` ausfüllen!) |

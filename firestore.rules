@@ -15,7 +15,7 @@ service cloud.firestore {
         && request.resource.data.uid == request.auth.uid
         && request.resource.data.t is string && request.resource.data.t.size() <= 40
         && request.resource.data.ts == request.time
-        && request.resource.data.persona in ['logiker','empath','stratege']
+        && request.resource.data.persona in ['logiker','empath','stratege','tyrann']
         && request.resource.data.hidden is bool
         && request.resource.data.limit in [300, 600, 1200]
         && request.resource.data.secs is int && request.resource.data.secs >= 0 && request.resource.data.secs <= request.resource.data.limit
