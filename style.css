@@ -122,3 +122,11 @@ th{color:var(--dim);font-weight:500;font-family:var(--mono);font-size:11px}
 .empty{color:var(--dim);text-align:center;padding:30px 10px;font-size:14px}
 .small-btn{border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-family:var(--mono);font-size:12px;margin-top:12px}
 .status{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:center;padding:8px}
+
+.opt.wide{grid-column:1/-1;text-align:center}
+.opt.danger-opt b{color:var(--warn)}
+.opt.danger-opt.on{border-color:var(--warn);background:rgba(255,93,93,.08)}
+.msg.ai.threat{border-color:var(--warn);background:#2a1214;color:#ffd9d9;animation:in .2s ease-out,shake .45s .2s}
+.msg.ai.threat::before{color:var(--warn)}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+.hud.red{background:#1d0d0f;border-bottom-color:var(--warn)}
